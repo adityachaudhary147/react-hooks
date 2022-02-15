@@ -45,7 +45,7 @@ function PokemonInfo({pokemonName}) {
   //   3. pokemon: <PokemonDataView pokemon={pokemon} />
 
   // 💣 remove this
-  if(status=="rejected")
+  if(status==="rejected")
   {
     throw error;
   }
