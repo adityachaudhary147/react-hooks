@@ -7,6 +7,8 @@ import * as React from 'react'
 // PokemonInfoFallback: the thing we show while we're loading the pokemon info
 // PokemonDataView: the stuff we use to display the pokemon info
 import {fetchPokemon, PokemonDataView, PokemonForm, PokemonInfoFallback} from '../pokemon'
+
+import {ErrorBoundary} from 'react-error-boundary';
 function PokemonInfo({pokemonName}) {
   // 🐨 Have state for the pokemon (null)
   const [pokemon,setPokemon]=React.useState()
@@ -45,7 +47,7 @@ function PokemonInfo({pokemonName}) {
   // 💣 remove this
   if(status=="rejected")
   {
-    return <div>{error.message} error occured </div>
+    throw error;
   }
   return pokemonName ? (pokemon ? <PokemonDataView pokemon={pokemon} /> :<PokemonInfoFallback name={pokemonName} />) :'Submit a Pokemon' 
 }
@@ -56,14 +58,33 @@ function App() {
   function handleSubmit(newPokemonName) {
     setPokemonName(newPokemonName)
   }
+  function handleReset() {
+    setPokemonName('')
+  }
 
   return (
     <div className="pokemon-info-app">
       <PokemonForm pokemonName={pokemonName} onSubmit={handleSubmit} />
       <hr />
       <div className="pokemon-info">
-        <PokemonInfo pokemonName={pokemonName} />
+      <ErrorBoundary
+          FallbackComponent={ErrorFallback}
+          onReset={handleReset}
+          resetKeys={[pokemonName]}
+        >
+          <PokemonInfo pokemonName={pokemonName} />
+        </ErrorBoundary>
       </div>
+    </div>
+  )
+}
+
+function ErrorFallback({error, resetErrorBoundary}) {
+  return (
+    <div role="alert">
+      There was an error:{' '}
+      <pre style={{whiteSpace: 'normal'}}>{error.message}</pre>
+      <button onClick={resetErrorBoundary}>Try again</button>
     </div>
   )
 }
