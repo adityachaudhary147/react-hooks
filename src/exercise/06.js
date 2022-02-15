@@ -11,24 +11,40 @@ import {fetchPokemon, PokemonDataView, PokemonForm, PokemonInfoFallback} from '.
 import {ErrorBoundary} from 'react-error-boundary';
 function PokemonInfo({pokemonName}) {
   // 🐨 Have state for the pokemon (null)
-  const [pokemon,setPokemon]=React.useState()
-  const [error,setError]=React.useState()
-  const [status,setStatus]=React.useState('idle')
+  const [state, setState] = React.useState({
+    status: 'idle',
+    pokemon: null,
+    error: null,
+  })
+  const {status, pokemon, error} = state
+
   // 🐨 use React.useEffect where the callback should be called whenever the
   // pokemon name changes.
   React.useEffect(()=>{
     
-    setPokemon(null);
+    setState(prev=>{
+      return {...prev,pokemon:null}
+    });
     if(pokemonName)
-    {setStatus('pending');
+    {
+      setState(prev=>{
+        return{...prev,status:"pending"}
+      })
     fetchPokemon(pokemonName).then(
       PokemonData=>{
 
-        setPokemon(PokemonData);
-        setStatus('resolved');
+        setState(prev=>{
+          return{...prev,pokemon:PokemonData}
+        })
+        setState(prev=>{
+          return{...prev,status:"resolved"}
+        })
       }
-    ).catch(error=>{setError(error);
-    setStatus("rejected")})
+    ).catch(error=>{
+      setState(prev=>{return{...prev,error:error}})
+      setState(prev=>{
+        return{...prev,status:"rejected"}
+      })})
     }
   },[pokemonName])
   // 💰 DON'T FORGET THE DEPENDENCIES ARRAY!
