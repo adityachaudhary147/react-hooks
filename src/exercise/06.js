@@ -6,12 +6,29 @@ import * as React from 'react'
 // fetchPokemon: the function we call to get the pokemon info
 // PokemonInfoFallback: the thing we show while we're loading the pokemon info
 // PokemonDataView: the stuff we use to display the pokemon info
-import {PokemonForm} from '../pokemon'
-
+import {fetchPokemon, PokemonDataView, PokemonForm, PokemonInfoFallback} from '../pokemon'
 function PokemonInfo({pokemonName}) {
   // 🐨 Have state for the pokemon (null)
+  const [pokemon,setPokemon]=React.useState()
+  const [error,setError]=React.useState()
+  const [status,setStatus]=React.useState('idle')
   // 🐨 use React.useEffect where the callback should be called whenever the
   // pokemon name changes.
+  React.useEffect(()=>{
+    
+    setPokemon(null);
+    if(pokemonName)
+    {setStatus('pending');
+    fetchPokemon(pokemonName).then(
+      PokemonData=>{
+
+        setPokemon(PokemonData);
+        setStatus('resolved');
+      }
+    ).catch(error=>{setError(error);
+    setStatus("rejected")})
+    }
+  },[pokemonName])
   // 💰 DON'T FORGET THE DEPENDENCIES ARRAY!
   // 💰 if the pokemonName is falsy (an empty string) then don't bother making the request (exit early).
   // 🐨 before calling `fetchPokemon`, clear the current pokemon state by setting it to null.
@@ -26,7 +43,11 @@ function PokemonInfo({pokemonName}) {
   //   3. pokemon: <PokemonDataView pokemon={pokemon} />
 
   // 💣 remove this
-  return 'TODO'
+  if(status=="rejected")
+  {
+    return <div>{error.message} error occured </div>
+  }
+  return pokemonName ? (pokemon ? <PokemonDataView pokemon={pokemon} /> :<PokemonInfoFallback name={pokemonName} />) :'Submit a Pokemon' 
 }
 
 function App() {
